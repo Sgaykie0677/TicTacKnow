@@ -224,7 +224,7 @@
     </div>
   </section>
 
-  <footer>Tic Tac Know™ · play offline, anywhere.</footer>
+  <footer>Tic Tac Know™ · play offline, anywhere.<br>© 2026 C. M. Harris</footer>
 </div>
 
 <div class="scrim" id="scrim">
@@ -788,44 +788,6 @@ function speak(text){if(!canSpeak||muted||!text)return;try{
 let curQ=null;
 document.getElementById("sayBtn").onclick=()=>{primeSpeech();if(!canSpeak){toast("Voice needs Safari or Chrome 🔊");return;}if(curQ)speak(curQ.text+". "+curQ.answers.join(", or "));};
 
-/* setup */
-const catsEl=document.getElementById("cats");
-Object.entries(CATEGORIES).forEach(([key,c])=>{
-  const b=document.createElement("button");b.className="cat"+(key==="general"?" on":"");b.dataset.cat=key;
-  b.innerHTML=`<span class="e">${c.emoji}</span><div><div class="n">${c.name}</div><div class="ct">${BANK[key].length} questions</div></div>`;
-  b.onclick=()=>{document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));b.classList.add("on");S.category=key;sTap();topUpQueue(key);};
-  catsEl.appendChild(b);
-});
-topUpQueue(S.category); // warm the queue for the default category on page load
-document.querySelectorAll('#modeRow .seg').forEach(s=>{s.onclick=()=>{
-  document.querySelectorAll('#modeRow .seg').forEach(x=>x.classList.remove("on"));s.classList.add("on");S.mode=s.dataset.mode;
-  const h=S.mode==="two";document.getElementById("diffLabel").style.display=h?"none":"";document.getElementById("diffRow").style.display=h?"none":"";sTap();};});
-document.querySelectorAll('#diffRow .seg').forEach(s=>{s.onclick=()=>{
-  document.querySelectorAll('#diffRow .seg').forEach(x=>x.classList.remove("on"));s.classList.add("on");S.diff=s.dataset.diff;sTap();};});
-document.getElementById("startBtn").onclick=()=>{ac();primeSpeech();startMusic();startGame();};
-
-function markSVG(p){return p==="X"
-  ?`<svg class="mark x" viewBox="0 0 100 100"><line x1="24" y1="24" x2="76" y2="76"/><line x1="76" y1="24" x2="24" y2="76"/></svg>`
-  :`<svg class="mark o" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30"/></svg>`;}
-function pip(p){return markSVG(p).replace('class="mark','class="mark pipmark');}
-
-function startGame(){
-  topUpQueue(S.category);
-  S.board=Array(9).fill(null);S.turn="X";S.over=false;S.locked=false;S.recent=[];
-  document.getElementById("setup").classList.add("hidden");document.getElementById("game").classList.remove("hidden");
-  document.getElementById("catPill").textContent=CATEGORIES[S.category].name;
-  document.getElementById("labelX").textContent="You / X";
-  document.getElementById("labelO").textContent=S.mode==="solo"?"CPU / O":"Player O";
-  renderScores();buildBoard();updateTurn();
-}
-function newRound(){S.board=Array(9).fill(null);S.turn="X";S.over=false;S.locked=false;buildBoard();updateTurn();closeEnd();}
-function buildBoard(){const bd=document.getElementById("board");bd.innerHTML="";
-  for(let i=0;i<9;i++){const c=document.createElement("div");c.className="cell";c.dataset.i=i;
-    if(S.board[i]){c.classList.add("taken");c.innerHTML=markSVG(S.board[i]);}c.onclick=()=>onCell(i);bd.appendChild(c);}}
-function updateTurn(){document.getElementById("turnPip").innerHTML=pip(S.turn);
-  document.getElementById("turnText").textContent=S.turn==="X"?"Your turn":(S.mode==="solo"?"Computer's turn":"Player O's turn");}
-function onCell(i){if(S.over||S.locked||S.board[i])return;if(S.mode==="solo"&&S.turn==="O")return;sTap();askQuestion(i,S.turn);}
-
 /* ---- Live AI question generation ---- */
 // Paste your deployed Cloudflare Worker URL here after deploying it:
 const WORKER_URL="https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev";
@@ -864,6 +826,45 @@ function pickQuestion(){
   }
   return pickFromBank(); // instant fallback — never makes the player wait on a network call
 }
+
+/* setup */
+const catsEl=document.getElementById("cats");
+Object.entries(CATEGORIES).forEach(([key,c])=>{
+  const b=document.createElement("button");b.className="cat"+(key==="general"?" on":"");b.dataset.cat=key;
+  b.innerHTML=`<span class="e">${c.emoji}</span><div><div class="n">${c.name}</div><div class="ct">${BANK[key].length} questions</div></div>`;
+  b.onclick=()=>{document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));b.classList.add("on");S.category=key;sTap();topUpQueue(key);};
+  catsEl.appendChild(b);
+});
+topUpQueue(S.category); // warm the queue for the default category on page load
+document.querySelectorAll('#modeRow .seg').forEach(s=>{s.onclick=()=>{
+  document.querySelectorAll('#modeRow .seg').forEach(x=>x.classList.remove("on"));s.classList.add("on");S.mode=s.dataset.mode;
+  const h=S.mode==="two";document.getElementById("diffLabel").style.display=h?"none":"";document.getElementById("diffRow").style.display=h?"none":"";sTap();};});
+document.querySelectorAll('#diffRow .seg').forEach(s=>{s.onclick=()=>{
+  document.querySelectorAll('#diffRow .seg').forEach(x=>x.classList.remove("on"));s.classList.add("on");S.diff=s.dataset.diff;sTap();};});
+document.getElementById("startBtn").onclick=()=>{ac();primeSpeech();startMusic();startGame();};
+
+function markSVG(p){return p==="X"
+  ?`<svg class="mark x" viewBox="0 0 100 100"><line x1="24" y1="24" x2="76" y2="76"/><line x1="76" y1="24" x2="24" y2="76"/></svg>`
+  :`<svg class="mark o" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30"/></svg>`;}
+function pip(p){return markSVG(p).replace('class="mark','class="mark pipmark');}
+
+function startGame(){
+  topUpQueue(S.category);
+  S.board=Array(9).fill(null);S.turn="X";S.over=false;S.locked=false;S.recent=[];
+  document.getElementById("setup").classList.add("hidden");document.getElementById("game").classList.remove("hidden");
+  document.getElementById("catPill").textContent=CATEGORIES[S.category].name;
+  document.getElementById("labelX").textContent="You / X";
+  document.getElementById("labelO").textContent=S.mode==="solo"?"CPU / O":"Player O";
+  renderScores();buildBoard();updateTurn();
+}
+function newRound(){S.board=Array(9).fill(null);S.turn="X";S.over=false;S.locked=false;buildBoard();updateTurn();closeEnd();}
+function buildBoard(){const bd=document.getElementById("board");bd.innerHTML="";
+  for(let i=0;i<9;i++){const c=document.createElement("div");c.className="cell";c.dataset.i=i;
+    if(S.board[i]){c.classList.add("taken");c.innerHTML=markSVG(S.board[i]);}c.onclick=()=>onCell(i);bd.appendChild(c);}}
+function updateTurn(){document.getElementById("turnPip").innerHTML=pip(S.turn);
+  document.getElementById("turnText").textContent=S.turn==="X"?"Your turn":(S.mode==="solo"?"Computer's turn":"Player O's turn");}
+function onCell(i){if(S.over||S.locked||S.board[i])return;if(S.mode==="solo"&&S.turn==="O")return;sTap();askQuestion(i,S.turn);}
+
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 function askQuestion(i,player){S.locked=true;const q=pickQuestion();S.curCorrect=q.correct;curQ=q;
