@@ -1,5 +1,5 @@
-const CACHE_NAME = "tic-tac-know-v1";
-const FILES_TO_CACHE = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+const CACHE_NAME = "tic-tac-know-v2";
+const FILES_TO_CACHE = ["./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -18,6 +18,14 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
+  // Network-first for the page itself, so updates always show up immediately.
+  if (e.request.mode === "navigate" || e.request.url.endsWith(".html")) {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+  // Cache-first for static assets (icons, manifest) — fine for these to be stable.
   e.respondWith(
     caches.match(e.request).then((cached) => cached || fetch(e.request))
   );
